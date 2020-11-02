@@ -1,65 +1,46 @@
 #include<iostream>
-#include<stack>
 #include<vector>
+#include<stack>
 using namespace std;
 
-int main()
-{
-	int trains = 0;
-	while (cin >> trains)
-	{
-		if (trains == 0)
-		{
-			break;
-		}
-		while (true)
-		{
+int main() {
+	int numOfTrain;
+	while (cin >> numOfTrain && numOfTrain) {
+		while (true) {
 			stack<int> s;
-			vector<int> v;
-			bool end = 0;
-			for (int i = 0; i < trains; i++)
-			{
-				int num = 0;
-				cin >> num;
-				if (num == 0)
-				{
-					end = 1;
+			vector<int> order;
+			int train;
+			
+			for (int i = 1; i <= numOfTrain; i++) {
+				cin >> train;
+				if (train == 0) {
 					break;
 				}
-
-				v.push_back(num);
+				order.push_back(train);
 			}
 
-			if (end)
-			{
-				cout << endl;
+			if (order.empty()) {
 				break;
 			}
 
-			bool order = 1;
-			int train = 1;
-			int index = 0;
-
-			while (train < trains + 1)
-			{
-				s.push(train++);
-				while (!s.empty() && s.top() == v[index])
-				{
+			int departure = 0;
+			for (int i = 1; i <= numOfTrain; i++) {
+				s.push(i);
+				while (!s.empty() && s.top() == order[departure]) {
 					s.pop();
-					index++;
+					departure++;
 				}
 			}
-			if (s.empty())
-			{
+
+			if (s.empty()) {
 				cout << "Yes" << endl;
 			}
-			else
-			{
+			else {
 				cout << "No" << endl;
 			}
 		}
+		cout << endl;
 	}
 
-	system("pause");
 	return 0;
 }

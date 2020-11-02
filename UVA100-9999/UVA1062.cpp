@@ -1,45 +1,30 @@
 #include<iostream>
 #include<vector>
-#include<string>
 using namespace std;
 
-int main()
-{
-	string order;
-	int counter = 0;
-	while (cin >> order)
-	{
-		if (order == "end")
-		{
-			break;
-		}
-
-		int len = order.size();
+int main() {
+	string container;
+	int cases = 1;
+	while (cin >> container && container != "end") {
+		int len = container.size();
 		vector<int> LIS(len, 1);
 
-		for (int i = 0; i < len; i++)
-		{
-			for (int j = i + 1; j < len; j++)
-			{
-				if (int(order[i]) < int(order[j]))
-				{
-					LIS[j] = LIS[i] + 1 > LIS[j] ? LIS[i] + 1 : LIS[j];
+		for (int i = 0; i < len; i++) {
+			for (int j = i + 1; j < len; j++) {
+				if (container[i] < container[j] && LIS[i] + 1 > LIS[j]) {
+					LIS[j] = LIS[i] + 1;
 				}
 			}
 		}
-
+		
 		int max = 0;
-		for (int i = 0; i < len; i++)
-		{
-			if (max < LIS[i])
-			{
-				max = LIS[i];
+		for (int i : LIS) {
+			if (max < i) {
+				max = i;
 			}
 		}
-
-		cout << "Case " << ++counter << ": " << max << endl;
+		cout << "Case " << cases++ << ": " << max << endl;
 	}
 
-	system("pause");
 	return 0;
 }

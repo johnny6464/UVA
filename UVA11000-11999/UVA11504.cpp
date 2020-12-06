@@ -7,10 +7,11 @@ using namespace std;
 struct Node {
 	int order = 0;
 	int low = 0;
-	set<string> neighbors;
+	set<int> neighbors;
+	set<int> parents;
 };
 
-bool inStack(vector<string>& sequence, string target) {
+bool inStack(vector<int>& sequence, int target) {
 	for (auto iter = sequence.begin(); iter != sequence.end(); iter++) {
 		if (*iter == target) {
 			return true;
@@ -19,7 +20,20 @@ bool inStack(vector<string>& sequence, string target) {
 	return false;
 }
 
-void tarjan(map<string, Node>& relation, vector<string>& sequence, vector<set<string>>& scc, string now, int& order) {
+bool hasZeroIn(map<int, Node>& relation, set<int>& s) {
+	bool in = false;
+	for (auto iter = s.begin(); iter != s.end() && !in; iter++) {
+		for (auto iter1 = relation[*iter].parents.begin(); iter1 != relation[*iter].parents.end(); iter1++) {
+			if (s.find(*iter1) == s.end()) {
+				in = true;
+				break;
+			}
+		}
+	}
+	return !in;
+}
+
+void tarjan(map<int, Node>& relation, vector<int>& sequence, int now, int& order, int& head) {
 	relation[now].order = relation[now].low = ++order;
 	sequence.push_back(now);
 
@@ -28,52 +42,51 @@ void tarjan(map<string, Node>& relation, vector<string>& sequence, vector<set<st
 			relation[now].low = relation[now].low < relation[*iter].order ? relation[now].low : relation[*iter].order;
 		}
 		if (relation[*iter].order == 0) {
-			tarjan(relation, sequence, scc, *iter, order);
+			tarjan(relation, sequence, *iter, order, head);
 			relation[now].low = relation[now].low < relation[*iter].low ? relation[now].low : relation[*iter].low;
 		}
 	}
 
 	if (relation[now].order == relation[now].low) {
-		set<string> s;
+		set<int> s;
 		while (sequence.back() != now) {
 			s.insert(sequence.back());
 			sequence.pop_back();
 		}
 		s.insert(sequence.back());
 		sequence.pop_back();
-		scc.push_back(s);
+		
+		if (hasZeroIn(relation, s)) {
+			head++;
+		}
 	}
 }
 
 int main() {
-	int vNum, eNum, cases = 1;
-	while (cin >> vNum >> eNum && (vNum || eNum)) {
-		string src, dst;
-		map<string, Node> relation;
+	int cases;
+	cin >> cases;
+	while (cases--) {
+		int vNum, eNum, src, dst;
+		cin >> vNum >> eNum;
+
+		map<int, Node> relation;
+		for (int i = 1; i <= vNum; i++) {
+			relation[i] = Node();
+		}
 		for (int i = 0; i < eNum; i++) {
 			cin >> src >> dst;
 			relation[src].neighbors.insert(dst);
+			relation[dst].parents.insert(src);
 		}
-		int order = 0;
-		vector<string>sequence;
-		vector<set<string>> scc;
+
+		int order = 0, head = 0;
+		vector<int>sequence;
 		for (auto iter = relation.begin(); iter != relation.end(); iter++) {
 			if (iter->second.order == 0) {
-				tarjan(relation, sequence, scc, iter->first, order);
+				tarjan(relation, sequence, iter->first, order, head);
 			}
 		}
-		
-		if (cases != 1) {
-			cout << endl;
-		}
-		cout << "Calling circles for data set " << cases++ << ":" << endl;
-		for (auto iter = scc.begin(); iter != scc.end(); iter++) {
-			cout << *(iter->begin());
-			for (auto iter1 = ++iter->begin(); iter1 != iter->end(); iter1++) {
-				cout << ", " << *iter1;
-			}
-			cout << endl;
-		}
+		cout << head << endl;
 	}
 	return 0;
 }

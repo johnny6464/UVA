@@ -2,99 +2,58 @@
 #include<vector>
 using namespace std;
 
-int main()
-{
-	int nums = 0, cmds = 0;
-	while (cin >> nums >> cmds)
-	{
-		int m[100001];
+struct Group {
+	int parent;
+	int sum;
+	int num;
+	Group() :parent(0), sum(0), num(0) {};
+	Group(int p, int s, int n) :parent(p), sum(s), num(n) {};
+};
 
-		vector<vector<int>> set;
-		vector<int> offset;
-		set.push_back(offset);
-		for (int i = 1; i <= nums; i++)
-		{
-			vector<int> v(1, i);
-			set.push_back(v);
+int findRoot(vector<Group>& groups, int id) {
+	return id == groups[id].parent ? id : groups[id].parent = findRoot(groups, groups[id].parent);
+}
 
-			m[i] = i;
+int main() {
+	int n, m;
+	while (cin >> n >> m) {
+		vector<int> group(n + 1);
+		vector<Group> groups(n + 1);
+		for (int i = 1; i <= n; i++) {
+			group[i] = i;
+			groups[i] = Group(i, i, 1);
 		}
 
-		while (cmds--)
-		{
-			int cmd = 0, p = 0, q = 0;
+		int cmd, p, q;
+		for (int i = 0; i < m; i++) {
 			cin >> cmd;
-			if (cmd == 1)
-			{
+			if (cmd == 1) {
 				cin >> p >> q;
-
-				int P = m[p];
-				int Q = m[q];
-				if (P == Q)
-				{
-					continue;
+				int g1 = findRoot(groups, group[p]), g2 = findRoot(groups, group[q]);
+				if (g1 != g2) {
+					groups[g1].parent = g2;
+					groups[g2].sum += groups[g1].sum;
+					groups[g2].num += groups[g1].num;
+					groups[g1].num = groups[g1].sum = 0;
 				}
-
-				int clear = 0;
-				int lenP = set[P].size();
-				int lenQ = set[Q].size();
-				if (lenP > lenQ)
-				{
-					clear = Q;
-					for (int i = 0; i < lenQ; i++)
-					{
-						set[P].push_back(set[Q][i]);
-						m[set[Q][i]] = m[p];
-					}
-				}
-				else
-				{
-					clear = P;
-					for (int i = 0; i < lenP; i++)
-					{
-						set[Q].push_back(set[P][i]);
-						m[set[P][i]] = m[q];
-					}
-				}
-				set[clear].clear();
 			}
-			else if (cmd == 2)
-			{
+			else if (cmd == 2) {
 				cin >> p >> q;
-
-				int P = m[p];
-				int Q = m[q];
-				if (P == Q)
-				{
-					continue;
+				int g1 = findRoot(groups, group[p]), g2 = findRoot(groups, group[q]);
+				if (g1 != g2) {
+					group[p] = g2;
+					groups[g1].num--;
+					groups[g1].sum -= p;
+					groups[g2].num++;
+					groups[g2].sum += p;
 				}
-
-				vector<int>::iterator i;
-				for (i = set[P].begin(); i != set[P].end(); i++)
-				{
-					if (*i == p)
-					{
-						break;
-					}
-				}
-				set[P].erase(i);
-				set[Q].push_back(p);
-				m[p] = m[q];
 			}
-			else if (cmd == 3)
-			{
+			else {
 				cin >> p;
-
-				int sum = 0;
-				for (int i = 0; i < set[m[p]].size(); i++)
-				{
-					sum += set[m[p]][i];
-				}
-				cout << set[m[p]].size() << " " << sum << endl;
+				int g = findRoot(groups, group[p]);
+				cout << groups[g].num << " " << groups[g].sum << endl;
 			}
 		}
 	}
-
-	system("pause");
 	return 0;
 }

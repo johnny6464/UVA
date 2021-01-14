@@ -1,9 +1,9 @@
 #include<iostream>
-#include<map>
 #include<string>
+#include<map>
 using namespace std;
 
-static map<char, double> notes{
+map<char, double> duration{
 	{'W', 1.0},
 	{'H', 1.0 / 2},
 	{'Q', 1.0 / 4},
@@ -13,36 +13,25 @@ static map<char, double> notes{
 	{'X', 1.0 / 64}
 };
 
-int main()
-{
+
+int main() {
 	string composition;
-	while (getline(cin, composition))
-	{
-		if (composition == "*")
-		{
-			break;
-		}
+	while (cin >> composition && composition != "*") {
+		composition = composition.substr(1);
 
 		int correct = 0;
-		double duration = 0;
-		for (int i = 1; i < composition.size(); i++)
-		{
-			duration += notes[composition[i]];
-
-			if (composition[i] == '/')
-			{
-				if (duration == 1)
-				{
-					correct++;
-				}
-				duration = 0.0;
+		while (!composition.empty()) {
+			string measure = composition.substr(0, composition.find('/'));
+			double time = 0.0;
+			for (size_t i = 0; i < measure.size(); i++) {
+				time += duration[measure[i]];
 			}
+			if (time == 1) {
+				correct++;
+			}
+			composition = composition.substr(composition.find('/') + 1);
 		}
-
 		cout << correct << endl;
 	}
-
-
-	system("pause");
 	return 0;
 }
